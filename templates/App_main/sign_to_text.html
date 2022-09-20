@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<!-- Coding by CodingLab | www.codinglabweb.com-->
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--<title>Sidebar Menu | Side Navigation Bar</title>-->
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'css/base/style.css' %}" />
+  <!-- Boxicons CSS -->
+  <link
+    href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    nav {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .active {
+      background-color: #4070f4;
+    }
+
+    .active span {
+      color: #fff !important;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">
+      <i class="bx bx-menu menu-icon"></i>
+      <span class="logo-name">Sign Language Detector</span>
+    </div>
+    <div class="sidebar">
+      <div class="logo">
+        <i class="bx bx-menu menu-icon"></i>
+        <span class="logo-name">Sign Language Detector</span>
+      </div>
+
+      <div class="sidebar-content">
+        <ul class="lists">
+          <li class="list">
+            <a href="{% url 'App_main:hand-detection' %}" class="nav-link">
+              <i class='bx bxs-hand-up icon'></i>
+              <span class="link">Hand Detector</span>
+            </a>
+          </li>
+          <li class="list">
+            <a href="{% url 'App_main:sign-to-text' %}" class="nav-link active">
+              <i class="bx bxs-hand icon"></i>
+              <span class="link">Sign To Text</span>
+            </a>
+          </li>
+          <li class="list">
+            <a href="{% url 'App_main:speech-to-sign' %}" class="nav-link">
+              <i class="bx bx-message-rounded icon"></i>
+              <span class="link">Speech to Text to Sign</span>
+            </a>
+          </li>
+          <li class="list">
+            <a href="{% url 'App_main:about-us' %}" class="nav-link">
+              <i class="bx bx-pie-chart-alt-2 icon"></i>
+              <span class="link">About</span>
+            </a>
+          </li>
+          <li class="list">
+            <a href="{% url 'App_main:project-documentation' %}" class="nav-link">
+              <i class="bx bx-heart icon"></i>
+              <span class="link">Documentation</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="bottom-cotent">
+          <li class="list">
+            <a href="#" class="nav-link">
+              <i class="bx bx-cart-download icon"></i>
+              <span class="link">Buy the trained model</span>
+            </a>
+          </li>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="overlay"></section>
+
+  <script>
+    const navBar = document.querySelector("nav"),
+      menuBtns = document.querySelectorAll(".menu-icon"),
+      overlay = document.querySelector(".overlay");
+
+    menuBtns.forEach((menuBtn) => {
+      menuBtn.addEventListener("click", () => {
+        navBar.classList.toggle("open");
+      });
+    });
+
+    overlay.addEventListener("click", () => {
+      navBar.classList.remove("open");
+    });
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+  <script type="text/javascript">
+    // Classifier Variable
+    let classifier;
+    // Model URL
+    {% comment %} let imageModelURL = 'https://teachablemachine.withgoogle.com/models/3Oy718QEP/'; {% endcomment %}
+    let imageModelURL = 'https://teachablemachine.withgoogle.com/models/Sjk31Zce3/';
+    
+    // Video
+    let video;
+    let flippedVideo;
+    // To store the classification
+    let label = "";
+  
+    // Load the model first
+    function preload() {
+      classifier = ml5.imageClassifier(imageModelURL + 'model.json');
+    }
+  
+    function setup() {
+      let myCanvas = createCanvas(320, 260);
+
+      myCanvas.center();
+      // Create the video
+      video = createCapture(VIDEO);
+      video.size(320, 240);
+      video.hide();
+  
+      flippedVideo = ml5.flipImage(video);
+      // Start classifying
+      classifyVideo();
+    }
+  
+    function draw() {
+      background(0);
+      // Draw the video
+      image(flippedVideo, 0, 0);
+  
+      // Draw the label
+      fill(255);
+      textSize(16);
+      textAlign(CENTER);
+      text(label, width / 2, height - 4);
+    }
+  
+    // Get a prediction for the current video frame
+    function classifyVideo() {
+      flippedVideo = ml5.flipImage(video)
+      classifier.classify(flippedVideo, gotResult);
+      flippedVideo.remove();
+  
+    }
+  
+    // When we get a result
+    function gotResult(error, results) {
+      // If there is an error
+      if (error) {
+        console.error(error);
+        return;
+      }
+      // The results are in an array ordered by confidence.
+      // console.log(results[0]);
+      label = results[0].label;
+      // Classifiy again!
+      classifyVideo();
+    }
+  </script>
+  
+</body>
+</html>

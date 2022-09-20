@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!-- Coding by CodingLab | www.codinglabweb.com-->
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--<title>Sidebar Menu | Side Navigation Bar</title>-->
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'css/base/style.css' %}" />
+  <!-- Boxicons CSS -->
+  <link
+    href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    nav {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #real-canvas {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      grid-auto-rows: minmax(100px, auto);
+    }
+
+    video {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    .wrapper {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      grid-auto-rows: minmax(100px, auto);
+    }
+
+    #result_text {
+      text-align: center;
+    }
+
+    .active {
+      background-color: #4070f4;
+    }
+
+    .active span {
+      color: #fff !important;
+    }
+  </style>
+
+</head>
+<body>
+  <nav>
+    <div class="logo">
+      <i class="bx bx-menu menu-icon"></i>
+      <span class="logo-name">Sign Language Detector</span>
+    </div>
+    <div class="sidebar">
+      <div class="logo">
+        <i class="bx bx-menu menu-icon"></i>
+        <span class="logo-name">Sign Language Detector</span>
+      </div>
+
+      <div class="sidebar-content">
+        <ul class="lists">
+            <li class="list">
+              <a href="{% url 'App_main:hand-detection' %}" class="nav-link active">
+                <i class='bx bxs-hand-up icon'></i>
+                <span class="link">Hand Detector</span>
+              </a>
+            </li>
+            <li class="list">
+              <a href="{% url 'App_main:sign-to-text' %}" class="nav-link">
+                <i class="bx bxs-hand icon"></i>
+                <span class="link">Sign To Text</span>
+              </a>
+            </li>
+            <li class="list">
+              <a href="{% url 'App_main:speech-to-sign' %}" class="nav-link">
+                <i class="bx bx-message-rounded icon"></i>
+                <span class="link">Speech to Text to Sign</span>
+              </a>
+            </li>
+            <li class="list">
+              <a href="{% url 'App_main:about-us' %}" class="nav-link">
+                <i class="bx bx-pie-chart-alt-2 icon"></i>
+                <span class="link">About</span>
+              </a>
+            </li>
+            <li class="list">
+              <a href="{% url 'App_main:project-documentation' %}" class="nav-link">
+                <i class="bx bx-heart icon"></i>
+                <span class="link">Documentation</span>
+              </a>
+            </li>
+          </ul>
+
+        <div class="bottom-cotent">
+          <li class="list">
+            <a href="#" class="nav-link">
+              <i class="bx bx-cart-download icon"></i>
+              <span class="link">Buy the trained model</span>
+            </a>
+          </li>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="overlay"></section>
+
+  <script>
+    const navBar = document.querySelector("nav"),
+      menuBtns = document.querySelectorAll(".menu-icon"),
+      overlay = document.querySelector(".overlay");
+
+    menuBtns.forEach((menuBtn) => {
+      menuBtn.addEventListener("click", () => {
+        navBar.classList.toggle("open");
+      });
+    });
+
+    overlay.addEventListener("click", () => {
+      navBar.classList.remove("open");
+    });
+  </script>
+  
+  <div id="real-canvas">
+    <audio src="{% static 'js/Hand.m4a' %}" id="audio">
+    </audio>
+  
+    <video id="video" style="height: 450px !important; width: 350px;">
+    </video>
+  
+    <canvas id="canvas">
+    </canvas>
+  </div>
+
+  <div id="wrapper">
+    <h3 id="result_text">
+      Wait
+    </h3>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/handtrackjs@latest/dist/handtrack.min.js"> </script>
+  <script type="text/javascript">
+    let result_text = document.getElementById("result_text");
+    const modelParams = {
+      flipHorizontal: true,
+      imageScaleFactor: 0.7,
+      maxNumBoxes: 20,
+      iouThreshold: .5,
+      scoreThreshold: 0.79,
+    }
+
+    navigator.getUserMedia = 
+    navigator.getUserMedia || 
+    navigator.webkitGetUserMedia || 
+    navigator.mozGetUserMedia || 
+    navigator.msGetUserMedia;
+
+    const video = document.querySelector('#video');
+    const audio = document.querySelector('#audio');
+    const canvas = document.querySelector('#canvas');
+    const context = canvas.getContext('2d');
+    let model;
+
+    handTrack.startVideo(video)
+    .then(status => {
+      if(status) {
+        navigator.getUserMedia(
+          {video: {}}, 
+          stream => {
+            video.srcObject = stream;
+            setInterval(runDetection, 1000);
+          },
+          err => console.log(err)
+        );
+      }
+    })
+
+    function runDetection() {
+      model.detect(video) 
+      .then(predict => {
+        //if ((predict[1]['label'] === 'open' && predict[1]['score'] > 60)) {
+        //  audio.play();
+        //}
+        //model.renderPredictions(predict, canvas, context, video);
+        try { 
+          if (predict[0]['label'] === 'face' && predict[1]['label'] === 'open') {
+            result_text.innerText = "Hand Gesture Recognized";
+          }
+          else if (predict[0]['label'] === 'face' && predict[1]['label'] === 'open') {
+            result_text.innerText = "Hand Gesture Recognized";
+          }
+          else {
+            result_text.innerText = "Something wrong happened!!!";
+          }
+        }
+        catch (e) {
+          console.log(e.message);
+          result_text.innerText = "Wait";
+        }
+      })
+    }
+
+    handTrack.load(modelParams)
+    .then(lmodel => {
+      model = lmodel;
+    });
+
+  </script>
+</body>
+</html>
