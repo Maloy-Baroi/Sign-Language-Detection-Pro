@@ -1,0 +1,1 @@
+let imageModelURL = "https://teachablemachine.withgoogle.com/models/Sjk31Zce3/";
